@@ -1,14 +1,17 @@
+# frozen_string_literal: true
+
 require 'sinatra/base'
 require 'logger'
 
 require_relative '../lib/sensible_logging'
 
+# Example Sinatra app
 class App < Sinatra::Base
   register Sinatra::SensibleLogging
 
   sensible_logging(
     logger: Logger.new(STDOUT),
-    log_tags: [lambda { |req| [req.port] }],
+    log_tags: [->(req) { [req.port] }],
     exclude_params: ['two']
   )
 
@@ -21,7 +24,10 @@ class App < Sinatra::Base
   end
 
   get '/hello' do
-    logger.debug('test')
+    logger.tagged('todo') do |logger|
+      logger.debug('test')
+      env['rack.errors'].puts('This is an example error')
+    end
     'test'
   end
 
